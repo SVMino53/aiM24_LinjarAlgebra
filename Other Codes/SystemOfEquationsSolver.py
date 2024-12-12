@@ -238,18 +238,21 @@ class GaussMatrix:
     # Type conversion
     def __str__(self) -> str:
         text = ""
+        widths = [len(str(val)) for val in self.content[0]]
+        for row in self.content[1:]:
+            widths = [max(widths[i], len(str(val))) for i, val in enumerate(row)]
         for row in self.content:
             text += "|"
-            for val in row[:-1]:
-                text += f"{val}\t"
-            text += f"|{row[-1]}\t|\n"
+            for i, val in enumerate(row[:-1]):
+                text += f" {str(val):{widths[i]}} "
+            text += f"| {str(row[-1]):{widths[-1]}} |\n"
         return text
 
     def as_equations(self) -> str:
         pass
 
     def to_list(self) -> list[list[Frac]]:
-        pass
+        return self.content
 
     # Other methods
     def fill_in(self) -> None:
@@ -313,7 +316,7 @@ class GaussMatrix:
         ans = [""]*(len(self.content[0]) - 1)
         par_ind = 1
         for i in range(len(self.content[0]) - 2, -1, -1):
-            if self.content[i][i] == 0:
+            if i >= len(self.content) or self.content[i][i] == 0:
                 ans[i] = f"t_{par_ind}"
                 par_ind += 1
             else:
@@ -328,4 +331,9 @@ class GaussMatrix:
         for i in range(1, len(ans)):
             ans_str += f", {ans[i]}"
         ans_str += ")"
+        if par_ind > 1:
+            ans_str += "  t_1"
+            for i in range(2, par_ind):
+                ans_str += f", t_{i}"
+            ans_str += " \u2208 \u211d"
         print(f"Answer: {ans_str}")
